@@ -1,0 +1,13 @@
+{
+    "pokemons": [
+        {
+            "name": "duskull",
+            "id": 355,
+            "types": [
+                "ghost"
+            ],
+            "height": 8,
+            "weight": 150
+        }
+    ]
+}
