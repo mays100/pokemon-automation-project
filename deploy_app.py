@@ -111,7 +111,7 @@ def install_app_via_ssh(public_ip):
         "sudo apt install -y python3 python3-pip git",
         f"git clone {REPO_URL} /home/ubuntu/pokemon-app",
         "pip3 install requests",
-        "echo 'ברוך הבא לשרת הפוקימונים!'" | sudo tee /etc/motd",
+        "echo 'ברוך הבא לשרת הפוקימונים\\!\\!\\!' | sudo tee /etc/motd",
         "echo '------------------------------------'" | sudo tee -a /etc/motd",
         "echo 'להפעלת האפליקציה: cd /home/ubuntu/pokemon-app && python3 main.py'" | sudo tee -a /etc/motd",
         "echo 'לסיום ההתחברות: exit'" | sudo tee -a /etc/motd",
