@@ -4,14 +4,35 @@ import time
 import os
 
 # --- פרטי תצורה לפריסה (חובה לעדכן!) ---
-AWS_REGION = us-west-2 # שנה/י לאזור שלך (לדוגמה: us-east-1, eu-central-1)
-INSTANCE_TYPE = "t2.micro" # סוג מופע EC2. זכור/י ש-t2.micro הוא חלק משכבת החינם (Free Tier).
-AMI_ID = "ami-0361aec2a849b21f4" # !!! זה חובה! הדבק/י כאן את ה-AMI ID המדויק שקיבלת בשלב 1.3 (לדוגמה: ami-0abcdef1234567890) !!!
-KEY_PAIR_NAME = pokemon-app-key # שנה/י לשם צמד המפתחות שיצרת ב-AWS (שלב 1.2)
-SECURITY_GROUP_NAME = "pokemon-app-sg" # שם קבוצת האבטחה שתיווצר
-REPO_URL = "https://github.com/mays100/pokemon-automation-project.git" # !!! חובה! שנה/י לכתובת ה-URL המלאה של הריפוזיטוריון שלך ב-GitHub !!!
-SSH_KEY_PATH = pokemon-app-key.pem # נתיב לקובץ המפתח הפרטי שלך. מניח שהוא באותה תיקייה כמו deploy_app.py.
-                                   # אם קובץ ה-.pem נמצא בתיקייה אחרת, שנה/י לנתיב המלא: לדוגמה: "C:/Users/YourUser/.ssh/pokemon-app-key.pem"
+# שנה/י לאזור ה-AWS שבו אתה רוצה לפרוס (לדוגמה: "us-west-2" או "eu-central-1")
+# וודא/י שזה בתוך מרכאות כפולות.
+AWS_REGION = "us-west-2" 
+
+# סוג מופע EC2 (מומלץ t2.micro לשכבת החינם)
+# וודא/י שזה בתוך מרכאות כפולות.
+INSTANCE_TYPE = "t2.micro" 
+
+# !!! זה חובה! הדבק/י כאן את ה-AMI ID המדויק שקיבלת בשלב 1.3 (לדוגמה: "ami-0abcdef1234567890") !!!
+# וודא/י שזה בתוך מרכאות כפולות.
+AMI_ID = "ami-0361aec2a849b21f4" 
+
+# שם צמד המפתחות שיצרת ב-AWS (שלב 1.2)
+# וודא/י שזה בתוך מרכאות כפולות.
+KEY_PAIR_NAME = "pokemon-app-key" 
+
+# שם קבוצת האבטחה שתיווצר (אפשר להשאיר ככה)
+# וודא/י שזה בתוך מרכאות כפולות.
+SECURITY_GROUP_NAME = "pokemon-app-sg" 
+
+# !!! חובה! שנה/י לכתובת ה-URL המלאה של הריפוזיטוריון שלך ב-GitHub !!!
+# וודא/י שזה בתוך מרכאות כפולות.
+REPO_URL = "https://github.com/mays100/pokemon-automation-project.git" 
+
+# נתיב לקובץ המפתח הפרטי שלך (.pem).
+# מניח שהוא באותה תיקייה כמו deploy_app.py.
+# אם קובץ ה-.pem נמצא בתיקייה אחרת, שנה/י לנתיב המלא: לדוגמה: "C:/Users/YourUser/.ssh/pokemon-app-key.pem"
+# וודא/י שזה בתוך מרכאות כפולות.
+SSH_KEY_PATH = "pokemon-app-key.pem" 
 
 # --- לקוחות Boto3 ---
 ec2_client = boto3.client('ec2', region_name=AWS_REGION)
@@ -30,13 +51,14 @@ def create_security_group():
                 Description='Security group for Pokemon App Server'
             )
             security_group_id = sg_response['GroupId']
+            # פותח פורט 22 (SSH) מכל מקום (לא מומלץ בפרודקשן!)
             ec2_client.authorize_security_group_ingress(
                 GroupId=security_group_id,
                 IpPermissions=[
                     {'IpProtocol': 'tcp',
                      'FromPort': 22,
                      'ToPort': 22,
-                     'IpRanges': [{'CidrIp': '0.0.0.0/0'}]} # גישת SSH מכל מקום (לא מומלץ בפרודקשן!)
+                     'IpRanges': [{'CidrIp': '0.0.0.0/0'}]} 
                 ]
             )
             print(f"קבוצת האבטחה נוצרה בהצלחה עם ID: {security_group_id}")
@@ -66,9 +88,11 @@ def create_ec2_instance(security_group_id):
     )
     instance_id = instances['Instances'][0]['InstanceId']
     print(f"מופע EC2 נוצר עם ID: {instance_id}. ממתין שיהיה במצב ריצה...")
-
+    
+    # המתן עד שהמופע יהיה במצב ריצה (running)
     ec2_client.get_waiter('instance_running').wait(InstanceIds=[instance_id])
-
+    
+    # קבל את ה-IP הציבורי של המופע
     response = ec2_client.describe_instances(InstanceIds=[instance_id])
     public_ip = response['Reservations'][0]['Instances'][0]['PublicIpAddress']
     print(f"מופע EC2 במצב ריצה. IP ציבורי: {public_ip}")
@@ -77,24 +101,27 @@ def create_ec2_instance(security_group_id):
 def install_app_via_ssh(public_ip):
     """מתחבר לשרת באמצעות SSH ומתקין את האפליקציה."""
     print(f"מתחבר לשרת {public_ip} באמצעות SSH ומתקין את האפליקציה...")
-
+    
+    # נתיב מוחלט לקובץ מפתח SSH
     ssh_key_full_path = os.path.expanduser(SSH_KEY_PATH)
     if not os.path.exists(ssh_key_full_path):
         raise FileNotFoundError(f"קובץ מפתח SSH לא נמצא בנתיב: {ssh_key_full_path}")
 
-    if os.name == 'posix': # עבור Linux/macOS
-        os.chmod(ssh_key_full_path, 0o400) # הרשאות קריאה בלבד לבעלים
+    # הגדר הרשאות מתאימות לקובץ מפתח SSH ב-Linux/macOS (לא נחוץ ב-Windows)
+    if os.name == 'posix': 
+        os.chmod(ssh_key_full_path, 0o400) 
 
     key = paramiko.RSAKey.from_private_key_file(ssh_key_full_path)
-
+    
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
+    # נסה להתחבר מספר פעמים, כי לפעמים לוקח לשרת זמן לעלות
     max_retries = 15
     for i in range(max_retries):
         try:
             print(f"ניסיון התחברות SSH ({i+1}/{max_retries})...")
-            client.connect(hostname=public_ip, username='ubuntu', pkey=key, timeout=10)
+            client.connect(hostname=public_ip, username='ubuntu', pkey=key, timeout=10) 
             print("התחברות SSH הצליחה.")
             break
         except paramiko.AuthenticationException:
@@ -102,21 +129,22 @@ def install_app_via_ssh(public_ip):
         except Exception as e:
             if i == max_retries - 1:
                 raise Exception(f"נכשל להתחבר לשרת באמצעות SSH לאחר מספר ניסיונות: {e}")
-            time.sleep(10)
+            time.sleep(10) 
     else:
         raise Exception("נכשל להתחבר לשרת באמצעות SSH לאחר מספר ניסיונות.")
 
+    # פקודות להתקנה:
     commands = [
         "sudo apt update -y",
         "sudo apt install -y python3 python3-pip git",
         f"git clone {REPO_URL} /home/ubuntu/pokemon-app",
         "pip3 install requests",
-        "echo 'ברוך הבא לשרת הפוקימונים\\!\\!\\!' | sudo tee /etc/motd",
-        "echo '------------------------------------'" | sudo tee -a /etc/motd",
-        "echo 'להפעלת האפליקציה: cd /home/ubuntu/pokemon-app && python3 main.py'" | sudo tee -a /etc/motd",
-        "echo 'לסיום ההתחברות: exit'" | sudo tee -a /etc/motd",
-        "echo '------------------------------------'" | sudo tee -a /etc/motd",
-        "python3 /home/ubuntu/pokemon-app/main.py <<< $'כן\nלא'"
+        "echo 'ברוך הבא לשרת הפוקימונים!' | sudo tee /etc/motd", # תיקון: הסירי את ה-\!\!\! אם היו
+        "echo '------------------------------------' | sudo tee -a /etc/motd",
+        "echo 'להפעלת האפליקציה: cd /home/ubuntu/pokemon-app && python3 main.py' | sudo tee -a /etc/motd",
+        "echo 'לסיום ההתחברות: exit' | sudo tee -a /etc/motd",
+        "echo '------------------------------------' | sudo tee -a /etc/motd",
+        "python3 /home/ubuntu/pokemon-app/main.py <<< $'כן\nלא'" # אין צורך בפסיק אחרי הפקודה האחרונה ברשימה
     ]
 
     for command in commands:
