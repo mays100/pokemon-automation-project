@@ -4,13 +4,13 @@ import time
 import os
 
 # --- פרטי תצורה לפריסה (חובה לעדכן!) ---
-AWS_REGION = "us-west-2" # שנה/י לאזור שלך (לדוגמה: us-east-1, eu-central-1)
+AWS_REGION = us-west-2 # שנה/י לאזור שלך (לדוגמה: us-east-1, eu-central-1)
 INSTANCE_TYPE = "t2.micro" # סוג מופע EC2. זכור/י ש-t2.micro הוא חלק משכבת החינם (Free Tier).
-AMI_ID = "[הדבק כאן את ה-AMI ID שהעתקת מ-AWS]" # !!! זה חובה! הדבק/י כאן את ה-AMI ID המדויק שקיבלת בשלב 1.3 (לדוגמה: ami-0abcdef1234567890) !!!
-KEY_PAIR_NAME = "pokemon-app-key" # שנה/י לשם צמד המפתחות שיצרת ב-AWS (שלב 1.2)
+AMI_ID = ami-0361aec2a849b21f4 # !!! זה חובה! הדבק/י כאן את ה-AMI ID המדויק שקיבלת בשלב 1.3 (לדוגמה: ami-0abcdef1234567890) !!!
+KEY_PAIR_NAME = pokemon-app-key # שנה/י לשם צמד המפתחות שיצרת ב-AWS (שלב 1.2)
 SECURITY_GROUP_NAME = "pokemon-app-sg" # שם קבוצת האבטחה שתיווצר
-REPO_URL = "https://github.com/your-github-username/your-pokemon-repo-name.git" # !!! חובה! שנה/י לכתובת ה-URL המלאה של הריפוזיטוריון שלך ב-GitHub !!!
-SSH_KEY_PATH = "pokemon-app-key.pem" # נתיב לקובץ המפתח הפרטי שלך. מניח שהוא באותה תיקייה כמו deploy_app.py.
+REPO_URL = https://github.com/mays100/pokemon-automation-project.git # !!! חובה! שנה/י לכתובת ה-URL המלאה של הריפוזיטוריון שלך ב-GitHub !!!
+SSH_KEY_PATH = pokemon-app-key.pem # נתיב לקובץ המפתח הפרטי שלך. מניח שהוא באותה תיקייה כמו deploy_app.py.
                                    # אם קובץ ה-.pem נמצא בתיקייה אחרת, שנה/י לנתיב המלא: לדוגמה: "C:/Users/YourUser/.ssh/pokemon-app-key.pem"
 
 # --- לקוחות Boto3 ---
